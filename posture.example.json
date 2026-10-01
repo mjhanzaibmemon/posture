@@ -1,0 +1,13 @@
+{
+  "sshd_expect": {
+    "permitrootlogin": "no",
+    "passwordauthentication": "no",
+    "kbdinteractiveauthentication": "no",
+    "pubkeyauthentication": "yes"
+  },
+  "allowed_users": ["deploy"],
+  "allowed_listeners": ["22/tcp", "41641/udp", "68/udp"],
+  "services": ["docker", "tailscaled", "fail2ban"],
+  "backup_stamp_path": "/var/lib/baseline/last-backup",
+  "backup_max_age": "26h"
+}
