@@ -30,4 +30,9 @@ jobs:
         run: go test -race ./...
 
       - name: Build
-        run: go build ./cmd/posture
+        run: |
+          go version
+          go env GOOS GOARCH CGO_ENABLED
+          go build -v -o bin/posture ./cmd/posture
+          ls -l bin/posture
+          ./bin/posture -h 2>&1 | head -5 || true
