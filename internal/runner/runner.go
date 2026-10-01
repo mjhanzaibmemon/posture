@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"sync"
 )
 
 // Result is what a command left behind. A non-zero ExitCode is data, not an
@@ -103,12 +104,17 @@ type Canned struct {
 }
 
 // Fake is a Runner for tests. It never touches a network.
+//
+// Checks are run concurrently, so a shared Fake is written to from several
+// goroutines at once. The mutex is not decoration: without it the race detector
+// fails the build, and it is right to.
 type Fake struct {
 	Answers []Canned
 
-	// Calls records every command it was asked to run, so a test can assert on
+	mu sync.Mutex
+	// calls records every command it was asked to run, so a test can assert on
 	// what a check actually did rather than only on what it returned.
-	Calls []string
+	calls []string
 }
 
 // Target identifies the fake.
@@ -116,7 +122,9 @@ func (f *Fake) Target() string { return "fake" }
 
 // Run returns the first scripted answer matching the command.
 func (f *Fake) Run(_ context.Context, command string) (Result, error) {
-	f.Calls = append(f.Calls, command)
+	f.mu.Lock()
+	f.calls = append(f.calls, command)
+	f.mu.Unlock()
 
 	for _, a := range f.Answers {
 		if strings.Contains(command, a.Match) {
@@ -124,4 +132,12 @@ func (f *Fake) Run(_ context.Context, command string) (Result, error) {
 		}
 	}
 	return Result{ExitCode: 127, Stderr: "fake runner has no answer for: " + command}, nil
+}
+
+// Calls returns a copy of the commands this Fake was asked to run.
+func (f *Fake) Calls() []string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	return append([]string(nil), f.calls...)
 }

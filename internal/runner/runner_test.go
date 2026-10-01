@@ -40,8 +40,8 @@ func TestFakeMatchesInOrder(t *testing.T) {
 		t.Errorf("stdout = %q, want the first matching answer to win", got.Stdout)
 	}
 
-	if len(f.Calls) != 1 || !strings.Contains(f.Calls[0], "docker") {
-		t.Errorf("calls = %v, want the command recorded", f.Calls)
+	if calls := f.Calls(); len(calls) != 1 || !strings.Contains(calls[0], "docker") {
+		t.Errorf("calls = %v, want the command recorded", calls)
 	}
 }
 
