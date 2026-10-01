@@ -1,5 +1,8 @@
-posture
-posture.exe
-posture.json
-evidence/
-bin/
+# Anchored to the repository root on purpose. A bare "posture" here would match
+# any path segment with that name, which silently excludes cmd/posture and ships
+# a repository with no program in it. Ask me how I know.
+/posture
+/posture.exe
+/bin/
+/posture.json
+/evidence/
